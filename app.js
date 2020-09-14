@@ -2,10 +2,11 @@ const express = require("express");
 const bodyParser = require("body-parser");
 const { graphqlHTTP } = require("express-graphql"); //fn
 const { buildSchema } = require("graphql"); //fn
+const mongoose = require("mongoose");
+const EventModel = require("./models/event");
 
 // global vars
 const PORT = process.env.PORT || 3000;
-const events = [];
 
 ///////////////////////////////////////////////////
 // Create app
@@ -51,21 +52,32 @@ app.use(
     `),
     rootValue: {
       events: () => {
-          return events;
+        return EventModel.find()
+          .then((res) => {
+            return res.map((item) => {
+              return { ...item._doc };
+            });
+          })
+          .catch((e) => {
+            throw e;
+          });
       },
-      createEvents: (args) => {
-          const event = {
-              _id: Math.random().toString(),
-              title: args.eInput.title,
-              description: args.eInput.description,
-              price: +args.eInput.price,
-              date: new Date().toISOString()
-          };
-          events.push(event);
-          return event;
+      createEvents: async (args) => {
+        const event = new EventModel({
+          title: args.eInput.title,
+          description: args.eInput.description,
+          price: +args.eInput.price,
+          date: new Date(),
+        });
+        try {
+          const e = await event.save();
+          return { ...e._doc };
+        } catch (e) {
+          throw e;
+        }
       },
     },
-    graphiql:true
+    graphiql: true,
   })
 );
 
@@ -73,4 +85,13 @@ app.get("/", (req, res, next) => {
   res.send("Hello World!");
 });
 
-app.listen(PORT);
+mongoose
+  .connect(
+    `mongodb+srv://${process.env.MONGO_USER}:${process.env.MONGO_PASSWORD}@cluster0.gehfl.mongodb.net/${process.env.MONGO_DB}?retryWrites=true&w=majority`
+  )
+  .then(() => {
+    app.listen(PORT);
+  })
+  .catch((err) => {
+    console.log(err);
+  });
