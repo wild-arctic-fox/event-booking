@@ -6,19 +6,53 @@ const mongoose = require("mongoose");
 const bcrypt = require("bcryptjs");
 const EventModel = require("./models/event");
 const UserModel = require("./models/user");
+const user = require("./models/user");
 
+///////////////////////////////////////////////////
 // global vars
 const PORT = process.env.PORT || 3000;
+
+///////////////////////////////////////////////////
+// global function definition
+const getEvents = async (ids) => {
+  try {
+    const events = await EventModel.find({ _id: { $in: ids } });
+    events.map((event) => {
+      return {
+        ...event._doc,
+        creator: getUser.bind(this, event.creator),
+      };
+    });
+    return events;
+  } catch (err) {
+    throw err;
+  }
+};
+
+const getUser = async (id) => {
+  try {
+    const user = await UserModel.findById(id);
+    return {
+      ...user._doc,
+      userEvents: getEvents.bind(this, user._doc.userEvents),
+    };
+  } catch (err) {
+    throw err;
+  }
+};
+//
+///////////////////////////////////////////////////
+
 
 ///////////////////////////////////////////////////
 // Create app
 ///////////////////////////////////////////////////
 const app = express();
 
+
 ///////////////////////////////////////////////////
 // Use middleware
 ///////////////////////////////////////////////////
-
 app.use(bodyParser.json()); // Returns middleware that only parses json
 app.use(
   "/graphql",
@@ -31,12 +65,14 @@ app.use(
             description: String!
             price: Float!
             date: String!
+            creator: User!
         }
 
         type User {
             _id: ID!
             email: String!
             password: String
+            userEvents: [Event!]
         }
         
         input EventInput {
@@ -66,16 +102,18 @@ app.use(
         }
     `),
     rootValue: {
-      events: () => {
-        return EventModel.find()
-          .then((res) => {
-            return res.map((item) => {
-              return { ...item._doc };
-            });
-          })
-          .catch((e) => {
-            throw e;
+      events: async () => {
+        try {
+          const res = await EventModel.find();
+          return res.map((item) => {
+            return {
+              ...item._doc,
+              creator: getUser.bind(this, item._doc.creator),
+            };
           });
+        } catch (e) {
+          throw e;
+        }
       },
       createEvent: async (args) => {
         try {
