@@ -17,13 +17,10 @@ const PORT = process.env.PORT || 3000;
 const getEvents = async (ids) => {
   try {
     const events = await EventModel.find({ _id: { $in: ids } });
-    events.map((event) => {
-      return {
-        ...event._doc,
-        creator: getUser.bind(this, event.creator),
-      };
+    return events.map((event) => {
+      const creator = getUser(event.creator);
+      return { ...event._doc, creator  };
     });
-    return events;
   } catch (err) {
     throw err;
   }
@@ -32,10 +29,8 @@ const getEvents = async (ids) => {
 const getUser = async (id) => {
   try {
     const user = await UserModel.findById(id);
-    return {
-      ...user._doc,
-      userEvents: getEvents.bind(this, user._doc.userEvents),
-    };
+    const userEvents = getEvents(user._doc.userEvents);
+    return { ...user._doc, userEvents };
   } catch (err) {
     throw err;
   }
@@ -106,10 +101,8 @@ app.use(
         try {
           const res = await EventModel.find();
           return res.map((item) => {
-            return {
-              ...item._doc,
-              creator: getUser.bind(this, item._doc.creator),
-            };
+            const creator = getUser(item._doc.creator);
+            return { ...item._doc, creator };
           });
         } catch (e) {
           throw e;
