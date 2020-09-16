@@ -6,7 +6,7 @@ const graphqlResolver = require('./graphql/resolver');
 const mongoose = require("mongoose");
 
 ///////////////////////////////////////////////////
-// global vars
+// Global vars
 const PORT = process.env.PORT || 3000;
 
 
