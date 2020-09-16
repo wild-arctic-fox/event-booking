@@ -1,6 +1,6 @@
 const EventModel = require("../../models/event");
 const UserModel = require("../../models/user");
-const {dateToString} = require('../../helpers/date');
+const { dateToString } = require("../../helpers/date");
 
 module.exports = {
   ///////////////////////////////////////////////////
@@ -18,16 +18,19 @@ module.exports = {
 
   ///////////////////////////////////////////////////
   // Create new Event & put in the DB
-  createEvent: async (args) => {
+  createEvent: async (args, req) => {
+    if (!req.isAuth) {
+      throw new Error("Unautheticated!");
+    }
     try {
       const event = new EventModel({
         title: args.eInput.title,
         description: args.eInput.description,
         price: +args.eInput.price,
         date: dateToString(Date.now()),
-        creator: "5f5fafb4093a6138505f9179"
+        creator: req.userId
       });
-      const user = await UserModel.findById("5f5fafb4093a6138505f9179");
+      const user = await UserModel.findById(req.userId);
       if (!user) {
         throw new Error("No user with this ID");
       } else {
@@ -39,5 +42,5 @@ module.exports = {
     } catch (e) {
       throw e;
     }
-  }
+  },
 };

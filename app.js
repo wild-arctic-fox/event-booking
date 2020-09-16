@@ -4,6 +4,7 @@ const { graphqlHTTP } = require("express-graphql"); //fn
 const graphqlSchema = require('./graphql/schema');
 const graphqlResolver = require('./graphql/resolvers');
 const mongoose = require("mongoose");
+const isAuthMiddleware = require('./middleware/isAuth');
 
 ///////////////////////////////////////////////////
 // Global vars
@@ -20,6 +21,7 @@ const app = express();
 // Use middleware
 ///////////////////////////////////////////////////
 app.use(bodyParser.json()); // Returns middleware that only parses json
+app.use(isAuthMiddleware);
 app.use(
   "/graphql",
   graphqlHTTP({

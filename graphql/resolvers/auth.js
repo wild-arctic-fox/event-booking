@@ -25,6 +25,7 @@ module.exports = {
       throw e;
     }
   },
+  
   //////////////////////////////////////
   // Sign in function
   login: async ({email, password}) => {
