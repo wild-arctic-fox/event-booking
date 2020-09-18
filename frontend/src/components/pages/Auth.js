@@ -1,10 +1,13 @@
 import React, { Component } from "react";
 import "./Auth.css";
+import AuthContext from "../context/authContex";
 
 class AuthPage extends Component {
   state = {
     isLogin: true,
   };
+
+  static contextType = AuthContext;
 
   constructor() {
     super();
@@ -38,13 +41,13 @@ class AuthPage extends Component {
             token
             tokenExpiration
           }
-        }`
+        }`,
       };
 
-      console.log(this.state.isLogin)
+      console.log(this.state.isLogin);
 
       if (!this.state.isLogin) {
-        console.log('qwerty')
+        console.log("qwerty");
         requestBody = {
           query: `
             mutation {
@@ -52,7 +55,7 @@ class AuthPage extends Component {
                 _id
                 email
               }
-            }`
+            }`,
         };
       }
 
@@ -65,8 +68,12 @@ class AuthPage extends Component {
       });
       const res = await user.json();
       console.log(res);
+      if (this.state.isLogin && res.data.login.token) {
+        const {token, tokenExpiration, userId} = res.data.login;
+        this.context.login(token, tokenExpiration, userId)
+      }
     } catch (e) {
-      console.log(e);
+      throw new Error('Something went wrong!')
     }
   };
 
