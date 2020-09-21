@@ -18,7 +18,7 @@
   margin-bottom: 1rem;
 }
 
-.form-actions button {
+.form-actions button , .btn{
   background: #5101d1;
   font: inherit;
   border: 1px solid #23045e;
@@ -30,7 +30,8 @@
   cursor: pointer;
 }
 
-.form-actions button:hover,
+.form-actions button:hover, 
+.btn:hover, .btn:active
 .form-actions button:active {
     background: #38028f;
     border-color: #1d014b;
