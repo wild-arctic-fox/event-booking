@@ -33,7 +33,7 @@ module.exports = {
       const event = await EventModel.findById(eId);
       const booking = new BookingModel({
         event,
-        user: req.userId
+        user: req.userId,
       });
       const res = await booking.save();
       return {
@@ -50,11 +50,15 @@ module.exports = {
   ///////////////////////////////////////////////////
   // Delete existing Booking
   cancelBooking: async ({ bId }, req) => {
-    if (!req.isAuth) {
-      throw new Error("Unautheticated!");
+    try {
+      if (!req.isAuth) {
+        throw new Error("Unautheticated!");
+      }
+      const { event } = await BookingModel.findById(bId);
+      await BookingModel.findByIdAndDelete(bId);
+      return event;
+    } catch (e) {
+      throw e;
     }
-    const { event } = await BookingModel.findById(bId);
-    await BookingModel.findByIdAndDelete(bId);
-    return event;
   },
 };

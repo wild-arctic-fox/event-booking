@@ -43,7 +43,7 @@ app.use(
 );
 
 app.get("/", (req, res, next) => {
-  res.send("Hello World!");
+  //res.send("Hello World!");
 });
 
 mongoose
@@ -54,5 +54,5 @@ mongoose
     app.listen(PORT);
   })
   .catch((err) => {
-    console.log(err);
+    console.log("Error !!!!!!! ",err);
   });

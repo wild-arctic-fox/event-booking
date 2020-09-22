@@ -5,12 +5,14 @@ import AuthContext from "../context/authContex";
 import EventList from '../Events/EventList';
 import Spinner from '../Spinner/Spinner';
 import "./Events.css";
+import { Model } from "mongoose";
 
 class EventsPage extends Component {
   state = {
     creating: false,
     events: [],
-    isLoading: false
+    isLoading: false,
+    selectedEvent: null
   };
 
   static contextType = AuthContext;
@@ -28,7 +30,7 @@ class EventsPage extends Component {
   };
 
   cancelModel = () => {
-    this.setState({ creating: false });
+    this.setState({ creating: false, selectedEvent: null });
   };
 
   confirmModel = async () => {
@@ -117,8 +119,19 @@ class EventsPage extends Component {
       this.setState({events,isLoading:false});
     } catch (e) {
       this.setState({isLoading:false});
-      throw new Error();
+      console.log(e);
+      //throw new Error();
     }
+  }
+
+  viewDetailHandler = (eventId) => {
+    console.log(eventId)
+    this.setState(prev=>{
+      const selectedEvent = prev.events.find(item=>item._id===eventId);
+      return {
+        selectedEvent
+      }
+    });
   }
 
   render() {
@@ -132,6 +145,7 @@ class EventsPage extends Component {
             canConfirm
             onConfirm={this.confirmModel}
             onCancel={this.cancelModel}
+            confirmText="Confirm"
           >
             <form>
               <div className="form-control">
@@ -157,6 +171,23 @@ class EventsPage extends Component {
             </form>
           </Modal>
         )}
+        {this.state.selectedEvent && (
+          <Modal
+            title={this.state.selectedEvent.title}
+            canCancel
+            canConfirm
+            onCancel={this.cancelModel}
+            onConfirm={null}
+            confirmText="Book"
+          >
+            <h1>{this.state.selectedEvent.title}</h1>
+            <h2>
+              ${this.state.selectedEvent.price} -{' '}
+              {new Date(this.state.selectedEvent.date).toLocaleDateString()}
+            </h2>
+            <p>{this.state.selectedEvent.description}</p>
+          </Modal>
+        )}
         {this.context.token && (
           <div className="events-control">
             <p>Share your own Events!</p>
@@ -168,6 +199,7 @@ class EventsPage extends Component {
         {this.state.isLoading?<Spinner/>:<EventList
             events={this.state.events}
             authUserId={this.context.userId}
+            onViewDetail={this.viewDetailHandler}
           />}
       </Fragment>
     );
