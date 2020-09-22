@@ -27,7 +27,7 @@ module.exports = {
         title: args.eInput.title,
         description: args.eInput.description,
         price: +args.eInput.price,
-        date: dateToString(Date.now()),
+        date: dateToString(args.eInput.date),
         creator: req.userId
       });
       const user = await UserModel.findById(req.userId);

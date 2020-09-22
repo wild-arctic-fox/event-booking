@@ -44,10 +44,7 @@ class AuthPage extends Component {
         }`,
       };
 
-      console.log(this.state.isLogin);
-
       if (!this.state.isLogin) {
-        console.log("qwerty");
         requestBody = {
           query: `
             mutation {
@@ -67,7 +64,6 @@ class AuthPage extends Component {
         },
       });
       const res = await user.json();
-      console.log(res);
       if (this.state.isLogin && res.data.login.token) {
         const {token, tokenExpiration, userId} = res.data.login;
         this.context.login(token, tokenExpiration, userId)
