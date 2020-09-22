@@ -119,13 +119,12 @@ class EventsPage extends Component {
       this.setState({events,isLoading:false});
     } catch (e) {
       this.setState({isLoading:false});
-      console.log(e);
-      //throw new Error();
+      console.log(e.message);
+      throw new Error();
     }
   }
 
   viewDetailHandler = (eventId) => {
-    console.log(eventId)
     this.setState(prev=>{
       const selectedEvent = prev.events.find(item=>item._id===eventId);
       return {
@@ -186,6 +185,7 @@ class EventsPage extends Component {
               {new Date(this.state.selectedEvent.date).toLocaleDateString()}
             </h2>
             <p>{this.state.selectedEvent.description}</p>
+            <p>{this.state.selectedEvent.creator.email}</p>
           </Modal>
         )}
         {this.context.token && (
