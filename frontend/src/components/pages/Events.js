@@ -2,12 +2,15 @@ import React, { Component, Fragment } from "react";
 import Modal from "../Modal/Modal";
 import Backdrop from "../Backdrop/Backdrop";
 import AuthContext from "../context/authContex";
+import EventList from '../Events/EventList';
+import Spinner from '../Spinner/Spinner';
 import "./Events.css";
 
 class EventsPage extends Component {
   state = {
     creating: false,
-    events: []
+    events: [],
+    isLoading: false
   };
 
   static contextType = AuthContext;
@@ -56,10 +59,6 @@ class EventsPage extends Component {
               description
               price
               date
-              creator {
-                _id 
-                email
-              }
             }
           }`,
       };
@@ -88,6 +87,7 @@ class EventsPage extends Component {
 
   fetchEvents = async () => {
     try{
+      this.setState({isLoading:true});
       const requestBody = {
         query: `
           query {
@@ -114,16 +114,14 @@ class EventsPage extends Component {
       });
       const res = await user.json();
       const events = res.data.events;
-      this.setState({events});
+      this.setState({events,isLoading:false});
     } catch (e) {
-      throw new Error("Something went wrong!");
+      this.setState({isLoading:false});
+      throw new Error();
     }
   }
 
   render() {
-    const eventsList = this.state.events.map(item=>{
-    return <li className="events__list-item">{item.title}</li>;
-    });
     return (
       <Fragment>
         {this.state.creating && <Backdrop />}
@@ -167,9 +165,10 @@ class EventsPage extends Component {
             </button>
           </div>
         )}
-        <ul className="events__list">
-          {eventsList}
-        </ul>
+        {this.state.isLoading?<Spinner/>:<EventList
+            events={this.state.events}
+            authUserId={this.context.userId}
+          />}
       </Fragment>
     );
   }
