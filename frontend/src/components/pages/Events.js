@@ -5,7 +5,6 @@ import AuthContext from "../context/authContex";
 import EventList from '../Events/EventList';
 import Spinner from '../Spinner/Spinner';
 import "./Events.css";
-import { Model } from "mongoose";
 
 class EventsPage extends Component {
   state = {
@@ -67,7 +66,7 @@ class EventsPage extends Component {
 
       const token = this.context.token;
 
-      const user = await fetch("http://localhost:8000/graphql", {
+      const result = await fetch("http://localhost:8000/graphql", {
         method: "POST",
         body: JSON.stringify(requestBody),
         headers: {
@@ -75,7 +74,7 @@ class EventsPage extends Component {
           Authorization: "Bearer " + token,
         },
       });
-      const res = await user.json();
+      const res = await result.json();
       this.fetchEvents();
     } catch (e) {
       throw new Error("Something went wrong!");
@@ -107,14 +106,14 @@ class EventsPage extends Component {
           }`,
       };
 
-      const user = await fetch("http://localhost:8000/graphql", {
+      const result = await fetch("http://localhost:8000/graphql", {
         method: "POST",
         body: JSON.stringify(requestBody),
         headers: {
           "Content-Type": "application/json"
         },
       });
-      const res = await user.json();
+      const res = await result.json();
       const events = res.data.events;
       this.setState({events,isLoading:false});
     } catch (e) {
@@ -131,6 +130,35 @@ class EventsPage extends Component {
         selectedEvent
       }
     });
+  }
+
+  bookEventHandler = async ( ) => {
+    this.cancelModel();
+    if(!this.context.token){
+      return;
+    }
+    const requestBody = {
+      query: `
+        mutation {
+          bookEvent(eId:"${this.state.selectedEvent._id}") {
+            _id
+            createdAt
+            updatedAt
+          }
+        }`,
+    };
+
+    const token = this.context.token;
+
+    const user = await fetch("http://localhost:8000/graphql", {
+      method: "POST",
+      body: JSON.stringify(requestBody),
+      headers: {
+        "Content-Type": "application/json",
+        Authorization: "Bearer " + token,
+      },
+    });
+    const res = await user.json();
   }
 
   render() {
@@ -176,12 +204,12 @@ class EventsPage extends Component {
             canCancel
             canConfirm
             onCancel={this.cancelModel}
-            onConfirm={null}
+            onConfirm={this.bookEventHandler}
             confirmText="Book"
           >
             <h1>{this.state.selectedEvent.title}</h1>
             <h2>
-              ${this.state.selectedEvent.price} -{' '}
+              ${this.state.selectedEvent.price} - {' '}
               {new Date(this.state.selectedEvent.date).toLocaleDateString()}
             </h2>
             <p>{this.state.selectedEvent.description}</p>
