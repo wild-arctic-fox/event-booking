@@ -2,11 +2,14 @@ import React, { Component } from "react";
 import AuthContext from "../context/authContex";
 import Spinner from "../Spinner/Spinner";
 import BookingsList from '../Bookings/BookingsList/BookingsList';
+import BookingsChart from '../Bookings/BookingsList/BookigsChart';
+import BookingsControl from '../Bookings/BookingsList/BookindsControl';
 
 class BookingsPage extends Component {
   state = {
     isLoading: false,
     bookings: [],
+    type: 'list'
   };
 
   static contextType = AuthContext;
@@ -27,6 +30,7 @@ class BookingsPage extends Component {
               event{
                 date
                 title
+                price
               }
             }
           }`,
@@ -81,13 +85,30 @@ class BookingsPage extends Component {
     }
   }
 
+  whatRender = type => {
+    if(type === 'list'){
+      this.setState({type:'list'});
+    } else {
+      this.setState({type:'chart'});
+    }
+  }
+
   render() {
+    let content = (<Spinner/>);
+    if(!this.state.isLoading){
+      content = (
+        <React.Fragment>
+          <BookingsControl onClickType={this.whatRender}/>
+          {this.state.type === 'list'?
+          <BookingsList bookings={this.state.bookings} onDelete={this.cancelBookingHandler}/>:
+         <BookingsChart bookings={this.state.bookings}/>
+          }
+        </React.Fragment>
+      )
+    }
     return (
       <React.Fragment>
-        <h1>The Bookings Page</h1>
-        {this.state.isLoading?<Spinner/>:(
-         <BookingsList bookings={this.state.bookings} onDelete={this.cancelBookingHandler}/>
-        )}
+       {content}
       </React.Fragment>
     );
   }

@@ -4,6 +4,10 @@ body {
   background-color: #be9cf8;
 }
 
+.wrap{
+  text-align: center;
+}
+
 .form-control label,
 .form-control input,
 .form-control textarea {
